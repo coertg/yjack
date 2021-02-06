@@ -1,11 +1,12 @@
 const desiredScore = 21
 
 let numericRankValues = {}
-for(let i = 2; i <= 10; i++)
-  numericRankValues['' + i] = i
+for(let i = 2; i <= 9; i++)
+  numericRankValues[i] = i
 
 const rankValueLookup = {
   ...numericRankValues,
+  '10': 10,
   'J': 10,
   'K': 10,
   'Q': 10,
@@ -14,7 +15,7 @@ const rankValueLookup = {
 const suitHierarchy = ['D', 'C', 'H', 'S'] // higher index beats lower index
 
 const parseCardString = cardString => {
-  const [rank, suit] = cardString.split('')
+  const [rank, suit] = cardString.length < 3 ? cardString.split('') : [10, cardString[cardString.length-1]]
   return {
     rank,
     rankValue: rankValueLookup[rank],
@@ -33,14 +34,20 @@ const getHandScoreAnalysis = hand => {
 const firstHandBreaksTie = (first, second) => {
   let winnerFound = false
   let firstHandIsWinner
-  
-  for(let i = 0; i < first.length && !winnerFound; i++){ // Compare cards in order of rank first
-    winnerFound = first[i].score !== second[i].score
+  let defaultCard = {score: 0}
+  let requiredComparisons = Math.max(first.length, second.length)
+
+  // Assumption: if one player has more cards than the other, and we reach a point 
+  // where only one player has cards left for comparison, the player with more cards is going to win
+  for(let i = 0; i < requiredComparisons && !winnerFound; i++){ // Compare cards in order of rank first
+    let firstCard = first[i] || defaultCard
+    let secondCard = second[i] || defaultCard
+    winnerFound = firstCard.score !== secondCard.score
     if(winnerFound)
-      firstHandIsWinner = first[i].score < second[i].score
+      firstHandIsWinner = firstCard.score > secondCard.score
   }
 
-  if(!winnerFound){ // If hands are identical in terms of rank, than we check the suit of the highest card
+  if(!winnerFound){ // If hands are identical in terms of rank, then we check the suit of the highest card
     let firstSuitIndex = suitHierarchy.indexOf(first[0].suit)
     let secondSuitIndex = suitHierarchy.indexOf(second[0].suit)
 
