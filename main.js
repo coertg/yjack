@@ -1,3 +1,6 @@
-const arguments = require('./src/command-line-args')
+const {url} = require('./src/command-line-args')
+const fetchInput = require('./src/fetch-input')
 
-console.log(arguments)
+fetchInput(url).then(result => {
+  console.log(url, result)
+})
